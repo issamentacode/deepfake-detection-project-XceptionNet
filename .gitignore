@@ -1,0 +1,47 @@
+# Data
+data/raw/
+data/processed/
+*.pkl
+*.h5
+*.npy
+
+# Models
+trained_models/
+*.pth
+*.pt
+*.onnx
+
+# Results
+results/plots/
+results/temp/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Config secrets
+config/secrets.yaml
+*.env
