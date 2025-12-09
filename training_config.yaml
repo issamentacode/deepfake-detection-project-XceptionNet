@@ -1,0 +1,77 @@
+# Configuration de l'entraînement
+
+training:
+  epochs: 50
+  batch_size: 32
+  learning_rate: 0.0001
+  weight_decay: 0.00001
+  
+  # Stratégie d'apprentissage
+  optimizer: "adam"
+  scheduler: "reduce_on_plateau"
+  patience: 2
+  factor: 0.5
+  
+  # Early stopping
+  early_stopping: true
+  early_stopping_patience: 10
+  
+  # Checkpoints
+  save_best: true
+  save_frequency: 5
+
+model:
+  name: "xception"
+  pretrained: true
+  num_classes: 2
+  
+  # Fine-tuning
+  unfreeze_layers: 20
+  dropout_rate: 0.5
+  
+  # Architecture de la tête
+  hidden_size: 512
+  activation: "relu"
+  use_batchnorm: true
+
+data:
+  # Préprocessing
+  image_size: 299
+  normalization:
+    mean: [0.485, 0.456, 0.406]
+    std: [0.229, 0.224, 0.225]
+  
+  # Augmentation (train only)
+  augmentation:
+    random_horizontal_flip: true
+    random_rotation: 10
+    color_jitter:
+      brightness: 0.2
+      contrast: 0.2
+    
+  # Split
+  train_split: 0.7
+  val_split: 0.15
+  test_split: 0.15
+  
+  # DataLoader
+  num_workers: 2
+  pin_memory: true
+
+paths:
+  data_root: "/chemin/vers/dataset"
+  output_dir: "trained_models"
+  results_dir: "results"
+  logs_dir: "logs"
+
+metrics:
+  # Métriques à calculer
+  - accuracy
+  - precision
+  - recall
+  - f1_score
+  - auc_roc
+  - confusion_matrix
+  
+  # Métriques spécifiques deepfake
+  deepfake_recall_weight: 1.5  # Poids plus important pour le recall des deepfakes

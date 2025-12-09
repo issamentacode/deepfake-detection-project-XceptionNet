@@ -1,0 +1,86 @@
+"""
+FaceForensics Dataset Loader
+Compatible avec FaceForensics++ C23
+"""
+
+import os
+import torch
+from torch.utils.data import Dataset
+from PIL import Image
+import numpy as np
+
+class FaceForensicsDataset(Dataset):
+    """Dataset pour la classification Original vs Deepfake"""
+    
+    def __init__(self, root_dir, transform=None, mode='train'):
+        """
+        Args:
+            root_dir: Chemin vers le dossier parent (contient Original/ et Deepfakes/)
+            transform: Transformations torchvision
+            mode: 'train', 'val', ou 'test'
+        """
+        self.root_dir = root_dir
+        self.transform = transform
+        self.mode = mode
+        self.samples = []
+        self.labels = []
+        
+        self._load_data()
+        self._shuffle()
+        
+    def _load_data(self):
+        """Charge toutes les images des dossiers Original et Deepfakes"""
+        # Original (label 0)
+        orig_path = os.path.join(self.root_dir, 'Original')
+        if os.path.exists(orig_path):
+            for img_name in os.listdir(orig_path):
+                if img_name.lower().endswith(('.png', '.jpg', '.jpeg')):
+                    self.samples.append(os.path.join(orig_path, img_name))
+                    self.labels.append(0)
+        
+        # Deepfakes (label 1)
+        fake_path = os.path.join(self.root_dir, 'Deepfakes')
+        if os.path.exists(fake_path):
+            for img_name in os.listdir(fake_path):
+                if img_name.lower().endswith(('.png', '.jpg', '.jpeg')):
+                    self.samples.append(os.path.join(fake_path, img_name))
+                    self.labels.append(1)
+        
+        print(f" {self.mode.upper()} Dataset: {len(self.samples)} images")
+        print(f"   Original: {self.labels.count(0)}, Deepfake: {self.labels.count(1)}")
+    
+    def _shuffle(self):
+        """Mélange les données"""
+        indices = np.random.permutation(len(self.samples))
+        self.samples = [self.samples[i] for i in indices]
+        self.labels = [self.labels[i] for i in indices]
+    
+    def __len__(self):
+        return len(self.samples)
+    
+    def __getitem__(self, idx):
+        img_path = self.samples[idx]
+        label = self.labels[idx]
+        
+        try:
+            # Chargement de l'image
+            image = Image.open(img_path).convert('RGB')
+            
+            # Application des transformations
+            if self.transform:
+                image = self.transform(image)
+            
+            return image, label
+            
+        except Exception as e:
+            print(f" Erreur chargement {img_path}: {e}")
+            # Fallback: image noire
+            return torch.zeros(3, 299, 299), label
+    
+    def get_class_distribution(self):
+        """Retourne la distribution des classes"""
+        return {
+            'original': self.labels.count(0),
+            'deepfake': self.labels.count(1),
+            'total': len(self.labels)
+        }
